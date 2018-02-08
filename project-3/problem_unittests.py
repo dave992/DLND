@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow.contrib import rnn
-
+from distutils.version import LooseVersion
 
 def _print_success_message():
     print('Tests Passed')
@@ -263,8 +263,14 @@ def test_build_nn(build_nn):
         # Check Shape
         assert logits.get_shape().as_list() == test_input_data_shape + [test_vocab_size], \
             'Outputs has wrong shape.  Found shape {}'.format(logits.get_shape())
-        assert final_state.get_shape().as_list() == [test_rnn_layer_size, 2, None, test_rnn_size], \
-            'Final state wrong shape.  Found shape {}'.format(final_state.get_shape())
+        
+        # Added TensorFlow version check
+        if LooseVersion(tf.__version__) >= LooseVersion('1.4'):
+            assert final_state.get_shape().as_list() == [test_rnn_layer_size, 2, test_input_data_shape[0], test_rnn_size], \
+                'Final state wrong shape.  Found shape {}'.format(final_state.get_shape())
+        else:
+            assert final_state.get_shape().as_list() == [test_rnn_layer_size, 2, None, test_rnn_size], \
+                'Final state wrong shape.  Found shape {}'.format(final_state.get_shape())
 
     _print_success_message()
 
